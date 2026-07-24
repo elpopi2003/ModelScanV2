@@ -1,73 +1,56 @@
-# Welcome to your Lovable project
+# ModelKitScan
 
-## Project info
+App móvil para catalogar tu colección de maquetas (scale models). Escanea la caja de un kit
+—por **código de barras (EAN)** o por **foto de la caja**— e identifica y autocompleta sus
+datos (nombre, marca, escala, referencia, año) con ayuda de IA y de [scalemates.com](https://scalemates.com).
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+Gratuita, con espacios para publicidad. Antes conocida como el prototipo "Escáner de Maquetas".
 
-## How can I edit this code?
+## Stack
 
-There are several ways of editing your application.
+- **Vite + React + TypeScript** con **shadcn/ui** y **Tailwind CSS**
+- **Capacitor** para empaquetar como app nativa (iOS + Android)
+- **Supabase** — auth, base de datos (Postgres + RLS), storage y Edge Functions
+- **Google Gemini** (visión) para identificar el kit desde la foto de la caja
+- **Firecrawl** para consultar/scrapear datos de scalemates.com (con caché en la tabla `kits`)
 
-**Use Lovable**
+## Puesta en marcha (desarrollo)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+Requisitos: Node.js 20+ y npm.
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# 1. Instalar dependencias
+npm install
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# 2. Configurar variables de entorno
+cp .env.example .env.local   # y rellena los valores de tu proyecto Supabase
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# 3. Arrancar el servidor de desarrollo
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Variables de entorno
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Cliente (`.env.local`, públicas — la seguridad la da RLS):
 
-**Use GitHub Codespaces**
+- `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_PROJECT_ID`
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Secretos del backend (se configuran como *secrets* de las Edge Functions en Supabase, **no** en el repo):
 
-## What technologies are used for this project?
+- `GEMINI_API_KEY` — usada por la función `identify-kit`
+- `FIRECRAWL_API_KEY` — usada por la función `scalemates-search`
 
-This project is built with:
+## Estructura
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- `src/pages` — pantallas (Inicio, Stash/biblioteca, Escanear, Buscar, Detalle, Perfil, Auth)
+- `src/hooks` — datos y utilidades (`useKits`, `useAuth`, `useBarcode`, `useCamera`, …)
+- `src/lib/scalemates.ts` — cliente de la función de búsqueda en scalemates
+- `supabase/functions` — Edge Functions (`identify-kit`, `scalemates-search`)
+- `supabase/migrations` — esquema de la base de datos
 
-## How can I deploy this project?
+## Scripts
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- `npm run dev` — servidor de desarrollo
+- `npm run build` — build de producción
+- `npm run lint` — ESLint
+- `npm test` — tests (Vitest)

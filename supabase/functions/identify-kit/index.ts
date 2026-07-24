@@ -1,11 +1,16 @@
 // identify-kit — identifica un kit de maqueta a partir de la foto de la caja
 // usando la API de Google Gemini (visión) con salida estructurada (responseSchema).
+// Requiere usuario autenticado y aplica rate-limiting por usuario.
+import { createClient } from 'npm:@supabase/supabase-js@2.57.2';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
 const GEMINI_MODEL = Deno.env.get('GEMINI_MODEL') || 'gemini-flash-latest';
+const RATE_MAX = 40; // escaneos por usuario
+const RATE_WINDOW_SECONDS = 3600; // por hora
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -38,6 +43,28 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // --- Autenticación: exige usuario con sesión válida ---
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) return json({ success: false, error: 'No autorizado' }, 401);
+
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } }, auth: { persistSession: false } },
+    );
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData?.user) return json({ success: false, error: 'No autorizado' }, 401);
+
+    // --- Rate limit por usuario ---
+    const { data: allowed, error: rlError } = await supabase.rpc('check_and_increment_rate_limit', {
+      p_fn: 'identify-kit',
+      p_max: RATE_MAX,
+      p_window_seconds: RATE_WINDOW_SECONDS,
+    });
+    if (!rlError && allowed === false) {
+      return json({ success: false, error: 'Has alcanzado el límite de escaneos por hora. Inténtalo más tarde.' }, 429);
+    }
+
     const { image } = await req.json();
     if (!image) {
       return json({ success: false, error: 'Image data is required' }, 400);

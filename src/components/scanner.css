@@ -1,0 +1,27 @@
+/* Escáner en vivo — en nativo la cámara (ML Kit) se renderiza DETRÁS del webview,
+   así que ocultamos todo el contenido menos el modal del escáner. */
+body.barcode-scanner-active {
+  visibility: hidden;
+  background: transparent !important;
+}
+body.barcode-scanner-active .barcode-scanner-modal {
+  visibility: visible;
+}
+
+/* Preview de cámara del fallback web (html5-qrcode) */
+.scanner-video video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+}
+
+@keyframes ean-scanline {
+  0% { transform: translateY(-70px); opacity: 0.25; }
+  50% { opacity: 1; }
+  100% { transform: translateY(70px); opacity: 0.25; }
+}
+.ean-scanline {
+  top: 50%;
+  animation: ean-scanline 1.6s ease-in-out infinite;
+  box-shadow: 0 0 8px hsl(var(--accent));
+}

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">ModelKitScan</string>
+    <string name="title_activity_main">ModelKitScan</string>
+    <string name="package_name">com.modelkitscan.app</string>
+    <string name="custom_url_scheme">com.modelkitscan.app</string>
+</resources>

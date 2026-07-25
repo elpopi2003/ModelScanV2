@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ScanBarcode, Camera, X, Check, Plus, Search, Loader2, ExternalLink, Sparkles, ImagePlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { BarcodeScannerModal } from '@/components/BarcodeScannerModal';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { searchScalemates, type ScalematesKit } from '@/lib/scalemates';
@@ -22,6 +23,7 @@ interface IdentifiedKit {
 
 export default function Scan() {
   const [mode, setMode] = useState<'barcode' | 'camera'>('barcode');
+  const [showScanner, setShowScanner] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [manualBarcode, setManualBarcode] = useState('');
   const [searching, setSearching] = useState(false);
@@ -191,6 +193,13 @@ export default function Scan() {
 
   return (
     <div className="flex min-h-screen flex-col pb-24 safe-top">
+      {showScanner && (
+        <BarcodeScannerModal
+          onScanned={(code) => { setShowScanner(false); setManualBarcode(code); handleSearchScalemates(code); }}
+          onClose={() => setShowScanner(false)}
+          onManual={() => setShowScanner(false)}
+        />
+      )}
       <header className="px-4 pt-6 pb-4">
         <h1 className="text-xl font-bold text-center">Escanear</h1>
       </header>
@@ -217,15 +226,19 @@ export default function Scan() {
         </Button>
       </div>
 
-      {/* Barcode Mode — manual entry only */}
+      {/* Barcode Mode */}
       {mode === 'barcode' && (
         <div className="flex flex-col items-center px-4">
-          <div className="w-full max-w-sm rounded-2xl border border-border bg-muted flex flex-col items-center justify-center py-12 gap-3">
-            <ScanBarcode className="h-12 w-12 text-muted-foreground/30" />
-            <p className="text-sm text-muted-foreground text-center px-4">
-              Introduce el código de barras de tu maqueta
+          <button
+            onClick={() => setShowScanner(true)}
+            className="w-full max-w-sm rounded-2xl border-2 border-dashed border-primary/40 bg-primary/5 flex flex-col items-center justify-center py-12 gap-3 transition active:scale-[0.99]"
+          >
+            <ScanBarcode className="h-12 w-12 text-primary" />
+            <p className="text-sm font-semibold">Escanear código en vivo</p>
+            <p className="text-xs text-muted-foreground text-center px-4">
+              Apunta la cámara al código de barras de la caja
             </p>
-          </div>
+          </button>
 
           {/* Manual entry */}
           <div className="mt-6 w-full max-w-sm">

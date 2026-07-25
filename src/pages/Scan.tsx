@@ -26,7 +26,7 @@ const SHELF_OPTIONS = [
   { key: 'stash', label: 'Por montar' },
   { key: 'in-progress', label: 'En construcción' },
   { key: 'completed', label: 'Terminadas' },
-  { key: 'wishlist', label: 'Deseados' },
+  { key: 'wishlist', label: 'Vitrina' },
 ];
 
 const CATEGORY_ES: Record<string, string> = {

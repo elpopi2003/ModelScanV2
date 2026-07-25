@@ -12,7 +12,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
     const stored = localStorage.getItem('modelkitscan-theme');
-    return (stored === 'light' || stored === 'dark') ? stored : 'dark';
+    return (stored === 'light' || stored === 'dark') ? stored : 'light';
   });
 
   useEffect(() => {

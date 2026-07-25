@@ -98,7 +98,7 @@ export default function AddKit() {
                 <SelectItem value="stash">Por montar</SelectItem>
                 <SelectItem value="in-progress">En construcción</SelectItem>
                 <SelectItem value="completed">Terminadas</SelectItem>
-                <SelectItem value="wishlist">Deseados</SelectItem>
+                <SelectItem value="wishlist">Vitrina</SelectItem>
               </SelectContent>
             </Select>
           </div>

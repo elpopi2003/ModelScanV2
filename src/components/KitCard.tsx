@@ -8,7 +8,7 @@ const statusLabels: Record<string, string> = {
   stash: 'Por montar',
   'in-progress': 'En construcción',
   completed: 'Terminadas',
-  wishlist: 'Deseados',
+  wishlist: 'Vitrina',
 };
 
 const statusColors: Record<string, string> = {
@@ -33,9 +33,9 @@ export function KitCard({ userKit, index = 0 }: KitCardProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.3 }}
       onClick={() => navigate(`/kit/${userKit.id}`)}
-      className="group cursor-pointer overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all hover:shadow-md active:scale-[0.98]"
+      className="group cursor-pointer overflow-hidden rounded-md bg-card blueprint-card transition-transform active:scale-[0.98]"
     >
-      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+      <div className="relative aspect-[4/3] overflow-hidden mm-grid">
         {kit.image_url ? (
           <img
             src={kit.image_url}
@@ -55,7 +55,7 @@ export function KitCard({ userKit, index = 0 }: KitCardProps) {
         </div>
       </div>
       <div className="px-3 py-2.5">
-        <p className="text-[11px] font-medium text-primary">{kit.brand}</p>
+        <p className="text-[11px] font-mono font-medium uppercase tracking-wider text-accent">{kit.brand}</p>
         <h3 className="text-sm font-bold leading-tight text-foreground line-clamp-2">{kit.name}</h3>
         <div className="mt-1.5 flex items-center justify-between">
           <span className="text-xs font-mono text-muted-foreground">{kit.scale}</span>

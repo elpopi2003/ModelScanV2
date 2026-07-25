@@ -17,14 +17,14 @@ const SHELVES: { key: string; label: string }[] = [
   { key: 'stash', label: 'Por montar' },
   { key: 'in-progress', label: 'En construcción' },
   { key: 'completed', label: 'Terminadas' },
-  { key: 'wishlist', label: 'Deseados' },
+  { key: 'wishlist', label: 'Vitrina' },
 ];
 
 const SHELF_LABEL: Record<string, string> = {
   stash: 'Por montar',
   'in-progress': 'En construcción',
   completed: 'Terminadas',
-  wishlist: 'Deseados',
+  wishlist: 'Vitrina',
 };
 
 export default function Stash() {

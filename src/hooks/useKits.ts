@@ -37,6 +37,7 @@ export function useAddKit() {
     mutationFn: async (input: {
       kit: TablesInsert<'kits'>;
       status: string;
+      condition?: string;
       notes?: string;
       price?: number;
       purchase_date?: string;
@@ -57,6 +58,7 @@ export function useAddKit() {
           user_id: user!.id,
           kit_id: kit.id,
           status: input.status,
+          condition: input.condition,
           notes: input.notes,
           price: input.price,
           purchase_date: input.purchase_date,

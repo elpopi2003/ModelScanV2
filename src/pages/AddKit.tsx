@@ -1,5 +1,5 @@
 import { ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,9 +13,17 @@ import { useState } from 'react';
 
 export default function AddKit() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const addKit = useAddKit();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+
+  // Prefill desde el escaneo (botón "Editar y añadir")
+  const dName = searchParams.get('name') ?? '';
+  const dBrand = searchParams.get('brand') ?? '';
+  const dScale = searchParams.get('scale') ?? '';
+  const dReference = searchParams.get('reference') ?? '';
+  const dStatus = searchParams.get('status') ?? 'stash';
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -56,23 +64,23 @@ export default function AddKit() {
       <form className="space-y-4 px-4 pt-4" onSubmit={handleSubmit}>
         <div className="space-y-1.5">
           <Label htmlFor="name">Nombre *</Label>
-          <Input id="name" name="name" placeholder="Ej: Spitfire Mk.IX" required />
+          <Input id="name" name="name" placeholder="Ej: Spitfire Mk.IX" required defaultValue={dName} />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label htmlFor="brand">Marca *</Label>
-            <Input id="brand" name="brand" placeholder="Ej: Tamiya" required />
+            <Input id="brand" name="brand" placeholder="Ej: Tamiya" required defaultValue={dBrand} />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="scale">Escala *</Label>
-            <Input id="scale" name="scale" placeholder="Ej: 1/48" required />
+            <Input id="scale" name="scale" placeholder="Ej: 1/48" required defaultValue={dScale} />
           </div>
         </div>
 
         <div className="space-y-1.5">
           <Label htmlFor="reference">Referencia</Label>
-          <Input id="reference" name="reference" placeholder="Ej: 61033" />
+          <Input id="reference" name="reference" placeholder="Ej: 61033" defaultValue={dReference} />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -82,7 +90,7 @@ export default function AddKit() {
           </div>
           <div className="space-y-1.5">
             <Label>Estado</Label>
-            <Select name="status" defaultValue="stash">
+            <Select name="status" defaultValue={dStatus}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>

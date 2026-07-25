@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ScanBarcode, Camera, X, Check, Plus, Search, Loader2, ExternalLink, Sparkles, ImagePlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 import { BarcodeScannerModal } from '@/components/BarcodeScannerModal';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -21,9 +22,49 @@ interface IdentifiedKit {
   confidence: number;
 }
 
+const SHELF_OPTIONS = [
+  { key: 'stash', label: 'Por montar' },
+  { key: 'in-progress', label: 'En construcción' },
+  { key: 'completed', label: 'Terminadas' },
+  { key: 'wishlist', label: 'Deseados' },
+];
+
+const CATEGORY_ES: Record<string, string> = {
+  Aircraft: 'Aviación',
+  Armor: 'Blindados',
+  Ships: 'Barcos',
+  Cars: 'Coches',
+  Space: 'Espacio',
+  Figures: 'Figuras',
+  Other: 'Otros',
+};
+
+function ShelfPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {SHELF_OPTIONS.map((s) => (
+        <button
+          key={s.key}
+          type="button"
+          onClick={() => onChange(s.key)}
+          className={cn(
+            'rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors',
+            value === s.key
+              ? 'border-primary bg-primary text-primary-foreground'
+              : 'border-border text-muted-foreground',
+          )}
+        >
+          {s.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function Scan() {
   const [mode, setMode] = useState<'barcode' | 'camera'>('barcode');
   const [showScanner, setShowScanner] = useState(false);
+  const [selectedShelf, setSelectedShelf] = useState('stash');
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [manualBarcode, setManualBarcode] = useState('');
   const [searching, setSearching] = useState(false);
@@ -78,9 +119,9 @@ export default function Scan() {
           image_url: kit.image_url || undefined,
           year: kit.year || undefined,
         },
-        status: 'stash',
+        status: selectedShelf,
       });
-      toast({ title: '¡Añadido!', description: `${kit.name} añadido a tu biblioteca` });
+      toast({ title: '¡Añadido!', description: `${kit.name} añadido a tu colección` });
     } catch (err: any) {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
     } finally {
@@ -181,9 +222,9 @@ export default function Scan() {
           year: enrichedData?.year || identifiedKit.year || undefined,
           barcode: enrichedData?.barcode || undefined,
         },
-        status: 'stash',
+        status: selectedShelf,
       });
-      toast({ title: '¡Añadido!', description: `${identifiedKit.name} añadido a tu biblioteca` });
+      toast({ title: '¡Añadido!', description: `${identifiedKit.name} añadido a tu colección` });
     } catch (err: any) {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
     } finally {
@@ -272,6 +313,10 @@ export default function Scan() {
                 <p className="text-xs font-medium text-muted-foreground">
                   {smResults.length} resultado{smResults.length > 1 ? 's' : ''} en Scalemates
                 </p>
+                <div className="mb-1">
+                  <p className="mb-1 text-[11px] text-muted-foreground">Añadir a la estantería:</p>
+                  <ShelfPicker value={selectedShelf} onChange={setSelectedShelf} />
+                </div>
                 {smResults.map((kit, i) => (
                   <motion.div
                     key={i}
@@ -305,7 +350,7 @@ export default function Scan() {
                         ) : (
                           <Plus className="mr-1 h-3 w-3" />
                         )}
-                        Añadir al stash
+                        Añadir a colección
                       </Button>
                       {kit.scalemates_url && (
                         <Button
@@ -411,6 +456,10 @@ export default function Scan() {
                     <p className="text-xs text-muted-foreground font-mono">
                       {enrichedData?.scale || identifiedKit.scale}
                       {(enrichedData?.reference || identifiedKit.reference) && ` · ${enrichedData?.reference || identifiedKit.reference}`}
+                      {(() => {
+                        const cat = enrichedData?.category || identifiedKit.category;
+                        return cat ? ` · ${CATEGORY_ES[cat] ?? cat}` : '';
+                      })()}
                       {(enrichedData?.year || identifiedKit.year) && ` · ${enrichedData?.year || identifiedKit.year}`}
                     </p>
                   </div>
@@ -428,12 +477,16 @@ export default function Scan() {
                     Datos enriquecidos con Scalemates
                     {enrichedData.scalemates_url && (
                       <a href={enrichedData.scalemates_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-auto flex items-center gap-1">
-                        Ver <ExternalLink className="h-3 w-3" />
+                        Ver ficha técnica <ExternalLink className="h-3 w-3" />
                       </a>
                     )}
                   </div>
                 )}
 
+                <div className="mt-3">
+                  <p className="mb-1 text-[11px] text-muted-foreground">Añadir a la estantería:</p>
+                  <ShelfPicker value={selectedShelf} onChange={setSelectedShelf} />
+                </div>
                 <div className="flex gap-2 mt-3">
                   <Button
                     size="sm"
@@ -452,7 +505,7 @@ export default function Scan() {
                     size="sm"
                     variant="outline"
                     className="rounded-full"
-                    onClick={() => navigate(`/add?name=${encodeURIComponent(enrichedData?.name || identifiedKit.name)}&brand=${encodeURIComponent(enrichedData?.brand || identifiedKit.brand)}&scale=${encodeURIComponent(enrichedData?.scale || identifiedKit.scale)}`)}
+                    onClick={() => navigate(`/add?name=${encodeURIComponent(enrichedData?.name || identifiedKit.name)}&brand=${encodeURIComponent(enrichedData?.brand || identifiedKit.brand)}&scale=${encodeURIComponent(enrichedData?.scale || identifiedKit.scale)}&reference=${encodeURIComponent(enrichedData?.reference || identifiedKit.reference || '')}&status=${selectedShelf}`)}
                   >
                     Editar y añadir
                   </Button>

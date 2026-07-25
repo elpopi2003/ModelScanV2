@@ -49,7 +49,7 @@ export default function SearchPage() {
         },
         status: 'stash',
       });
-      toast({ title: '¡Añadido!', description: `${kit.name} añadido a tu biblioteca` });
+      toast({ title: '¡Añadido!', description: `${kit.name} añadido a tu colección` });
     } catch (err: any) {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
     } finally {

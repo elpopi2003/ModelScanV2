@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 
 const navItems = [
   { path: '/', icon: Home, label: 'Inicio' },
-  { path: '/stash', icon: Grid3X3, label: 'Biblioteca' },
+  { path: '/stash', icon: Grid3X3, label: 'Colección' },
   { path: '/scan', icon: ScanBarcode, label: 'Escanear' },
   { path: '/search', icon: Search, label: 'Buscar' },
   { path: '/profile', icon: User, label: 'Perfil' },

@@ -84,8 +84,8 @@ export default function Stash() {
     }));
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Biblioteca');
-    XLSX.writeFile(wb, 'mi-biblioteca.xlsx');
+    XLSX.utils.book_append_sheet(wb, ws, 'Colección');
+    XLSX.writeFile(wb, 'mi-coleccion.xlsx');
     toast.success('Archivo exportado correctamente');
   }, [filtered]);
 
@@ -93,7 +93,7 @@ export default function Stash() {
     <div className="min-h-screen pb-24 safe-top">
       <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-xl px-4 pt-6 pb-3">
         <div className="flex items-center justify-between mb-3">
-          <h1 className="text-xl font-bold">Mi biblioteca</h1>
+          <h1 className="text-xl font-bold">Mi colección</h1>
           <div className="flex items-center gap-2">
             <Button size="icon" className="rounded-full bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground" onClick={handleExport} title="Exportar a Excel">
               <Download className="h-5 w-5" />

@@ -429,86 +429,105 @@ export default function Scan() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="mt-4 w-full max-w-sm rounded-xl border border-primary/30 bg-primary/10 p-4"
+                className="mt-4 w-full max-w-sm overflow-hidden rounded-md bg-card blueprint-card"
               >
-                <div className="flex items-center gap-2 mb-2">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-semibold text-primary">Kit identificado</span>
-                  <span className="ml-auto text-xs text-muted-foreground">
-                    {Math.round(identifiedKit.confidence * 100)}% confianza
-                  </span>
-                </div>
-                <div className="flex items-start gap-3">
+                {/* Imagen + badges */}
+                <div className="relative aspect-[4/3] mm-grid">
                   {enrichedData?.image_url && (
                     <img
                       src={enrichedData.image_url}
-                      alt={identifiedKit.name}
-                      className="h-16 w-16 rounded-lg object-cover shrink-0 border border-border"
+                      alt={enrichedData?.name || identifiedKit.name}
+                      className="absolute inset-0 h-full w-full object-cover"
                     />
                   )}
-                  <div className="space-y-1 min-w-0 flex-1">
-                    <p className="text-xs text-primary font-medium">
-                      {enrichedData?.brand || identifiedKit.brand}
-                    </p>
-                    <p className="text-sm font-semibold leading-tight">
-                      {enrichedData?.name || identifiedKit.name}
-                    </p>
-                    <p className="text-xs text-muted-foreground font-mono">
-                      {enrichedData?.scale || identifiedKit.scale}
-                      {(enrichedData?.reference || identifiedKit.reference) && ` · ${enrichedData?.reference || identifiedKit.reference}`}
-                      {(() => {
-                        const cat = enrichedData?.category || identifiedKit.category;
-                        return cat ? ` · ${CATEGORY_ES[cat] ?? cat}` : '';
-                      })()}
-                      {(enrichedData?.year || identifiedKit.year) && ` · ${enrichedData?.year || identifiedKit.year}`}
-                    </p>
-                  </div>
+                  <span className="absolute left-3 top-3 rounded border border-border bg-card px-2 py-0.5 font-mono text-[10px] font-medium text-primary">
+                    {enrichedData?.scale || identifiedKit.scale}
+                  </span>
+                  <span className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 font-mono text-[10px] font-medium text-primary-foreground">
+                    <Sparkles className="h-3 w-3" />
+                    {Math.round(identifiedKit.confidence * 100)}% match
+                  </span>
                 </div>
 
-                {enriching && (
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                    Buscando datos adicionales en Scalemates...
-                  </div>
-                )}
-                {enrichedData && (
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
-                    <Check className="h-3 w-3 text-primary" />
-                    Datos enriquecidos con Scalemates
-                    {enrichedData.scalemates_url && (
-                      <a href={enrichedData.scalemates_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-auto flex items-center gap-1">
-                        Ver ficha técnica <ExternalLink className="h-3 w-3" />
-                      </a>
-                    )}
-                  </div>
-                )}
+                {/* Cuerpo */}
+                <div className="p-4">
+                  <p className="font-mono text-[11px] font-medium uppercase tracking-wider text-accent">
+                    {enrichedData?.brand || identifiedKit.brand}
+                  </p>
+                  <h2 className="mt-1 text-lg leading-tight text-primary">
+                    {enrichedData?.name || identifiedKit.name}
+                  </h2>
 
-                <div className="mt-3">
-                  <p className="mb-1 text-[11px] text-muted-foreground">Añadir a la estantería:</p>
-                  <ShelfPicker value={selectedShelf} onChange={setSelectedShelf} />
-                </div>
-                <div className="flex gap-2 mt-3">
-                  <Button
-                    size="sm"
-                    className="rounded-full flex-1"
-                    onClick={handleAddIdentifiedToStash}
-                    disabled={addingIdentified || enriching}
-                  >
-                    {addingIdentified ? (
-                      <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                    ) : (
-                      <Plus className="mr-1 h-3 w-3" />
-                    )}
-                    Añadir al stash
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="rounded-full"
-                    onClick={() => navigate(`/add?name=${encodeURIComponent(enrichedData?.name || identifiedKit.name)}&brand=${encodeURIComponent(enrichedData?.brand || identifiedKit.brand)}&scale=${encodeURIComponent(enrichedData?.scale || identifiedKit.scale)}&reference=${encodeURIComponent(enrichedData?.reference || identifiedKit.reference || '')}&status=${selectedShelf}`)}
-                  >
-                    Editar y añadir
-                  </Button>
+                  {enriching ? (
+                    <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Buscando datos en Scalemates...
+                    </div>
+                  ) : enrichedData ? (
+                    <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <Check className="h-3 w-3 text-[hsl(var(--sealed))]" />
+                      Datos verificados con Scalemates
+                    </div>
+                  ) : null}
+
+                  {/* Rejilla 2×2 de specs */}
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <div className="rounded border border-border bg-muted/50 px-2.5 py-1.5">
+                      <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">Referencia</p>
+                      <p className="font-mono text-xs font-medium">{enrichedData?.reference || identifiedKit.reference || '—'}</p>
+                    </div>
+                    <div className="rounded border border-border bg-muted/50 px-2.5 py-1.5">
+                      <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">Escala</p>
+                      <p className="font-mono text-xs font-medium">{enrichedData?.scale || identifiedKit.scale}</p>
+                    </div>
+                    <div className="rounded border border-border bg-muted/50 px-2.5 py-1.5">
+                      <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">Tipo</p>
+                      <p className="font-mono text-xs font-medium">
+                        {(() => {
+                          const cat = enrichedData?.category || identifiedKit.category;
+                          return cat ? (CATEGORY_ES[cat] ?? cat) : '—';
+                        })()}
+                      </p>
+                    </div>
+                    <div className="rounded border border-border bg-muted/50 px-2.5 py-1.5">
+                      <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">Año kit</p>
+                      <p className="font-mono text-xs font-medium">{enrichedData?.year || identifiedKit.year || '—'}</p>
+                    </div>
+                  </div>
+
+                  {/* Estantería */}
+                  <div className="mt-3">
+                    <p className="mb-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Guardar en estantería</p>
+                    <ShelfPicker value={selectedShelf} onChange={setSelectedShelf} />
+                  </div>
+
+                  {/* Acciones */}
+                  <div className="mt-4 space-y-2">
+                    <Button
+                      className="w-full rounded-md"
+                      onClick={handleAddIdentifiedToStash}
+                      disabled={addingIdentified || enriching}
+                    >
+                      {addingIdentified ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Plus className="mr-1.5 h-4 w-4" />}
+                      Añadir a mi colección
+                    </Button>
+                    <div className="flex gap-2">
+                      {enrichedData?.scalemates_url && (
+                        <Button variant="outline" className="flex-1 rounded-md" asChild>
+                          <a href={enrichedData.scalemates_url} target="_blank" rel="noopener noreferrer">
+                            <ExternalLink className="mr-1.5 h-4 w-4" /> Ver ficha técnica
+                          </a>
+                        </Button>
+                      )}
+                      <Button
+                        variant="outline"
+                        className="flex-1 rounded-md"
+                        onClick={() => navigate(`/add?name=${encodeURIComponent(enrichedData?.name || identifiedKit.name)}&brand=${encodeURIComponent(enrichedData?.brand || identifiedKit.brand)}&scale=${encodeURIComponent(enrichedData?.scale || identifiedKit.scale)}&reference=${encodeURIComponent(enrichedData?.reference || identifiedKit.reference || '')}&status=${selectedShelf}`)}
+                      >
+                        Editar y añadir
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </motion.div>
             )}

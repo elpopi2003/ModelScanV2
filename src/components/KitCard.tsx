@@ -12,8 +12,8 @@ const statusLabels: Record<string, string> = {
 };
 
 const statusColors: Record<string, string> = {
-  stash: 'bg-primary/20 text-primary',
-  'in-progress': 'bg-accent/20 text-accent',
+  stash: 'bg-[hsl(var(--kit-stash))]/20 text-[hsl(var(--kit-stash))]',
+  'in-progress': 'bg-[hsl(var(--kit-progress))]/20 text-[hsl(var(--kit-progress))]',
   completed: 'bg-[hsl(var(--kit-completed))]/20 text-[hsl(var(--kit-completed))]',
   wishlist: 'bg-[hsl(var(--kit-wishlist))]/20 text-[hsl(var(--kit-wishlist))]',
 };

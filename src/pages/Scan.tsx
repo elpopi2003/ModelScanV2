@@ -80,7 +80,7 @@ export default function Scan() {
         },
         status: 'stash',
       });
-      toast({ title: '¡Añadido!', description: `${kit.name} añadido a tu stash` });
+      toast({ title: '¡Añadido!', description: `${kit.name} añadido a tu biblioteca` });
     } catch (err: any) {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
     } finally {
@@ -183,7 +183,7 @@ export default function Scan() {
         },
         status: 'stash',
       });
-      toast({ title: '¡Añadido!', description: `${identifiedKit.name} añadido a tu stash` });
+      toast({ title: '¡Añadido!', description: `${identifiedKit.name} añadido a tu biblioteca` });
     } catch (err: any) {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
     } finally {

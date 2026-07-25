@@ -87,10 +87,10 @@ export default function AddKit() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="stash">En Stash</SelectItem>
-                <SelectItem value="in-progress">En Progreso</SelectItem>
-                <SelectItem value="completed">Completado</SelectItem>
-                <SelectItem value="wishlist">Wishlist</SelectItem>
+                <SelectItem value="stash">Por montar</SelectItem>
+                <SelectItem value="in-progress">En construcción</SelectItem>
+                <SelectItem value="completed">Terminadas</SelectItem>
+                <SelectItem value="wishlist">Deseados</SelectItem>
               </SelectContent>
             </Select>
           </div>

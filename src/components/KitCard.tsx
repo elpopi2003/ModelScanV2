@@ -5,10 +5,10 @@ import { cn } from '@/lib/utils';
 import type { UserKitWithKit } from '@/hooks/useKits';
 
 const statusLabels: Record<string, string> = {
-  stash: 'En Stash',
-  'in-progress': 'En Progreso',
-  completed: 'Completado',
-  wishlist: 'Wishlist',
+  stash: 'Por montar',
+  'in-progress': 'En construcción',
+  completed: 'Terminadas',
+  wishlist: 'Deseados',
 };
 
 const statusColors: Record<string, string> = {

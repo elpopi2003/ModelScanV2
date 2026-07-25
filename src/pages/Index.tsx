@@ -116,7 +116,7 @@ const Index = () => {
         ) : (
           <div className="rounded-xl border border-dashed border-border p-8 text-center">
             <Package className="mx-auto h-10 w-10 text-muted-foreground/30" />
-            <p className="mt-2 text-sm text-muted-foreground">Tu stash está vacío</p>
+            <p className="mt-2 text-sm text-muted-foreground">Tu biblioteca está vacía</p>
             <Button size="sm" className="mt-3 rounded-full" onClick={() => navigate('/add')}>
               Añadir primera maqueta
             </Button>

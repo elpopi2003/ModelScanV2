@@ -20,7 +20,7 @@ const Index = () => {
     });
     return Object.entries(counts)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 4)
+      .slice(0, 6)
       .map(([scale, count]) => ({ scale, count }));
   }, [userKits]);
 
@@ -57,7 +57,7 @@ const Index = () => {
             <p className="text-xs text-muted-foreground">Total maquetas</p>
           </div>
         </motion.button>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           {scaleStats.length > 0 ? (
             scaleStats.map((stat, i) => (
               <motion.button
@@ -66,14 +66,14 @@ const Index = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: i * 0.08 }}
                 onClick={() => navigate('/stash')}
-                className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 text-left transition-colors hover:bg-secondary/50 active:scale-[0.98]"
+                className="flex flex-col gap-2 rounded-xl border border-border bg-card p-3 text-left transition-colors hover:bg-secondary/50 active:scale-[0.98]"
               >
-                <div className="rounded-lg bg-secondary p-2 text-primary">
-                  <Ruler className="h-5 w-5" />
+                <div className="w-fit rounded-lg bg-secondary p-1.5 text-primary">
+                  <Ruler className="h-4 w-4" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold leading-none">{stat.count}</p>
-                  <p className="text-xs text-muted-foreground">{stat.scale}</p>
+                  <p className="text-xl font-bold leading-none">{stat.count}</p>
+                  <p className="mt-1 font-mono text-[11px] text-muted-foreground">{stat.scale}</p>
                 </div>
               </motion.button>
             ))
@@ -81,7 +81,7 @@ const Index = () => {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="col-span-2 flex items-center gap-3 rounded-xl border border-border bg-card p-4"
+              className="col-span-3 flex items-center gap-3 rounded-xl border border-border bg-card p-4"
             >
               <div className="rounded-lg bg-secondary p-2 text-primary">
                 <Package className="h-5 w-5" />

@@ -3,9 +3,11 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useState } from "react";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { BottomNav } from "@/components/BottomNav";
+import Onboarding from "./pages/Onboarding";
 import Index from "./pages/Index";
 import Stash from "./pages/Stash";
 import Scan from "./pages/Scan";
@@ -32,13 +34,31 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+const ONBOARDED_KEY = "modelkitscan-onboarded";
+
 function AppRoutes() {
   const { user, loading } = useAuth();
+  const [onboarded, setOnboarded] = useState(
+    () => localStorage.getItem(ONBOARDED_KEY) === "1",
+  );
 
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (user && !onboarded) {
+    return (
+      <div className="mx-auto min-h-screen max-w-lg bg-background">
+        <Onboarding
+          onDone={() => {
+            localStorage.setItem(ONBOARDED_KEY, "1");
+            setOnboarded(true);
+          }}
+        />
       </div>
     );
   }

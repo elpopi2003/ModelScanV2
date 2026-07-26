@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ScanBarcode, Camera, X, Check, Plus, Search, Loader2, ExternalLink, Sparkles, ImagePlus } from 'lucide-react';
+import { ScanBarcode, Camera, X, Check, Plus, Search, Loader2, ExternalLink, Sparkles, ImagePlus, ScanSearch, PencilLine } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -28,6 +28,9 @@ const SHELF_OPTIONS = [
   { key: 'completed', label: 'Terminadas' },
   { key: 'wishlist', label: 'Vitrina' },
 ];
+
+// Por debajo de esta confianza, la identificación se considera fallida
+const MIN_CONFIDENCE = 0.35;
 
 const CATEGORY_ES: Record<string, string> = {
   Aircraft: 'Aviación',
@@ -72,6 +75,7 @@ export default function Scan() {
   const [addingId, setAddingId] = useState<number | null>(null);
   const [identifying, setIdentifying] = useState(false);
   const [identifiedKit, setIdentifiedKit] = useState<IdentifiedKit | null>(null);
+  const [identifyError, setIdentifyError] = useState<string | null>(null);
   const [addingIdentified, setAddingIdentified] = useState(false);
   const [enriching, setEnriching] = useState(false);
   const [enrichedData, setEnrichedData] = useState<ScalematesKit | null>(null);
@@ -148,6 +152,7 @@ export default function Scan() {
   const handleIdentifyFromImage = async (imageDataUrl: string) => {
     setIdentifying(true);
     setIdentifiedKit(null);
+    setIdentifyError(null);
     setEnrichedData(null);
     try {
       const { data, error } = await supabase.functions.invoke('identify-kit', {
@@ -156,6 +161,11 @@ export default function Scan() {
       if (error) throw new Error(error.message);
       if (!data?.success) throw new Error(data?.error || 'No se pudo identificar');
       const kit = data.data as IdentifiedKit;
+      // Confianza demasiado baja: lo tratamos como "no reconocido"
+      if (typeof kit.confidence === 'number' && kit.confidence < MIN_CONFIDENCE) {
+        setIdentifyError('low_confidence');
+        return;
+      }
       setIdentifiedKit(kit);
       toast({
         title: '¡Kit identificado!',
@@ -163,10 +173,18 @@ export default function Scan() {
       });
       enrichWithScalemates(kit);
     } catch (err: any) {
-      toast({ title: 'Error identificando', description: err.message, variant: 'destructive' });
+      setIdentifyError(err.message || 'unknown');
     } finally {
       setIdentifying(false);
     }
+  };
+
+  const retryPhoto = () => {
+    setPhotoPreview(null);
+    setIdentifiedKit(null);
+    setIdentifyError(null);
+    setEnrichedData(null);
+    fileInputRef.current?.click();
   };
 
   const uploadBoxPhoto = async (dataUrl: string): Promise<string | null> => {
@@ -403,7 +421,7 @@ export default function Scan() {
                   </div>
                 )}
                 <button
-                  onClick={() => { setPhotoPreview(null); setIdentifiedKit(null); setEnrichedData(null); }}
+                  onClick={() => { setPhotoPreview(null); setIdentifiedKit(null); setIdentifyError(null); setEnrichedData(null); }}
                   className="absolute top-3 right-3 rounded-full bg-background/60 p-1.5 backdrop-blur-sm"
                 >
                   <X className="h-4 w-4" />
@@ -533,6 +551,47 @@ export default function Scan() {
             )}
           </AnimatePresence>
 
+          {/* Estado: no reconocido */}
+          <AnimatePresence>
+            {identifyError && !identifying && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="mt-4 w-full max-w-sm overflow-hidden rounded-md bg-card blueprint-card"
+              >
+                <div className="flex items-center gap-3 border-b-2 border-primary/90 bg-primary px-4 py-3">
+                  <ScanSearch className="h-5 w-5 text-accent" />
+                  <p className="font-mono text-[11px] font-medium uppercase tracking-wider text-white">
+                    STATUS · NO MATCH
+                  </p>
+                </div>
+                <div className="p-4">
+                  <h2 className="text-lg leading-tight text-primary">No hemos reconocido la maqueta</h2>
+                  <p className="mt-1.5 text-sm text-muted-foreground">
+                    {identifyError === 'low_confidence'
+                      ? 'La imagen no da suficiente certeza. Prueba con una foto más nítida y bien iluminada de la carátula, o añádela a mano.'
+                      : 'No se pudo analizar la imagen. Revisa tu conexión e inténtalo de nuevo, o añade la maqueta manualmente.'}
+                  </p>
+                  <div className="mt-4 space-y-2">
+                    <Button className="w-full rounded-md" onClick={retryPhoto}>
+                      <Camera className="mr-1.5 h-4 w-4" />
+                      Reintentar con otra foto
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full rounded-md"
+                      onClick={() => navigate('/add')}
+                    >
+                      <PencilLine className="mr-1.5 h-4 w-4" />
+                      Añadir manualmente
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <div className="mt-4 w-full max-w-sm flex gap-2">
             <Button onClick={() => fileInputRef.current?.click()} size="lg" className="rounded-full flex-1" disabled={identifying}>
               <Camera className="mr-2 h-4 w-4" />
@@ -543,7 +602,7 @@ export default function Scan() {
               Galería
             </Button>
           </div>
-          {photoPreview && !identifying && !identifiedKit && (
+          {photoPreview && !identifying && !identifiedKit && !identifyError && (
             <div className="mt-2 w-full max-w-sm">
               <Button onClick={() => handleIdentifyFromImage(photoPreview)} size="lg" variant="outline" className="rounded-full w-full">
                 <Sparkles className="mr-2 h-4 w-4" />

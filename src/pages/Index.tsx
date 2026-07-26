@@ -1,11 +1,18 @@
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Package, Ruler, Plus } from 'lucide-react';
+import { Package, Ruler, Plus, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUserKits } from '@/hooks/useKits';
 import { KitCard } from '@/components/KitCard';
 import { Button } from '@/components/ui/button';
 import { Wordmark } from '@/components/Wordmark';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -20,7 +27,6 @@ const Index = () => {
     });
     return Object.entries(counts)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 6)
       .map(([scale, count]) => ({ scale, count }));
   }, [userKits]);
 
@@ -42,57 +48,55 @@ const Index = () => {
         </motion.div>
       </header>
 
-      <section className="px-4 pb-6 space-y-3">
-        <motion.button
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          onClick={() => navigate('/stash')}
-          className="flex w-full items-center gap-3 rounded-xl border border-border bg-card p-4 text-left transition-colors hover:bg-secondary/50 active:scale-[0.98]"
-        >
-          <div className="rounded-lg bg-secondary p-2 text-primary">
-            <Package className="h-5 w-5" />
-          </div>
-          <div>
-            <p className="text-2xl font-bold leading-none">{userKits.length}</p>
-            <p className="text-xs text-muted-foreground">Total maquetas</p>
-          </div>
-        </motion.button>
-        <div className="grid grid-cols-3 gap-3">
-          {scaleStats.length > 0 ? (
-            scaleStats.map((stat, i) => (
-              <motion.button
-                key={stat.scale}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: i * 0.08 }}
-                onClick={() => navigate('/stash')}
-                className="flex flex-col gap-2 rounded-xl border border-border bg-card p-3 text-left transition-colors hover:bg-secondary/50 active:scale-[0.98]"
-              >
-                <div className="w-fit rounded-lg bg-secondary p-1.5 text-primary">
-                  <Ruler className="h-4 w-4" />
-                </div>
-                <div>
-                  <p className="text-xl font-bold leading-none">{stat.count}</p>
-                  <p className="mt-1 font-mono text-[11px] text-muted-foreground">{stat.scale}</p>
-                </div>
-              </motion.button>
-            ))
-          ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="col-span-3 flex items-center gap-3 rounded-xl border border-border bg-card p-4"
+      <section className="px-4 pb-6">
+        <Dialog>
+          <DialogTrigger asChild>
+            <motion.button
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="flex w-full items-center gap-3 rounded-xl border border-border bg-card p-4 text-left transition-colors hover:bg-secondary/50 active:scale-[0.98]"
             >
               <div className="rounded-lg bg-secondary p-2 text-primary">
                 <Package className="h-5 w-5" />
               </div>
-              <div>
-                <p className="text-2xl font-bold leading-none">0</p>
-                <p className="text-xs text-muted-foreground">Maquetas</p>
+              <div className="flex-1">
+                <p className="text-2xl font-bold leading-none">{userKits.length}</p>
+                <p className="text-xs text-muted-foreground">Total maquetas</p>
               </div>
-            </motion.div>
-          )}
-        </div>
+              <div className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
+                Por escala
+                <ChevronRight className="h-4 w-4" />
+              </div>
+            </motion.button>
+          </DialogTrigger>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Maquetas por escala</DialogTitle>
+            </DialogHeader>
+            {scaleStats.length > 0 ? (
+              <div className="grid grid-cols-2 gap-3">
+                {scaleStats.map((stat) => (
+                  <div
+                    key={stat.scale}
+                    className="flex items-center gap-3 rounded-xl border border-border bg-card p-3"
+                  >
+                    <div className="rounded-lg bg-secondary p-2 text-primary">
+                      <Ruler className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="text-xl font-bold leading-none">{stat.count}</p>
+                      <p className="mt-0.5 font-mono text-[11px] text-muted-foreground">{stat.scale}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="py-4 text-center text-sm text-muted-foreground">
+                Aún no tienes maquetas en tu colección.
+              </p>
+            )}
+          </DialogContent>
+        </Dialog>
       </section>
 
       <section className="px-4">

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUserKits, UserKitWithKit } from '@/hooks/useKits';
 import { KitGrid } from '@/components/KitGrid';
 import { FilterBar } from '@/components/FilterBar';
+import { AppDrawer } from '@/components/AppDrawer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -93,7 +94,10 @@ export default function Stash() {
     <div className="min-h-screen pb-24 safe-top">
       <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-xl px-4 pt-6 pb-3">
         <div className="flex items-center justify-between mb-3">
-          <h1 className="text-xl font-bold">Mi colección</h1>
+          <div className="flex items-center gap-3">
+            <AppDrawer active="library" />
+            <h1 className="text-xl font-bold">Mi colección</h1>
+          </div>
           <div className="flex items-center gap-2">
             <Button size="icon" className="rounded-full bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground" onClick={handleExport} title="Exportar a Excel">
               <Download className="h-5 w-5" />

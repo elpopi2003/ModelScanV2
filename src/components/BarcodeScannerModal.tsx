@@ -147,18 +147,34 @@ export function BarcodeScannerModal({ onScanned, onClose, onManual }: Props) {
       {/* Retícula blueprint */}
       {!error && (
         <div className="pointer-events-none absolute inset-0 flex flex-col">
-          <div className="flex items-center justify-between p-4 font-mono text-[10px] tracking-widest text-accent">
-            <span>EAN·SCAN</span>
-            <span>FOCUS·AF</span>
-            <span>1/35</span>
+          <div className="flex items-center justify-center p-4">
+            <span className="font-mono text-xs uppercase tracking-[0.24em] text-white/90">Escanear</span>
           </div>
 
           <div className="flex flex-1 items-center justify-center">
-            <div className="relative h-[150px] w-[260px]">
+            <div className="relative h-[150px] w-[280px]">
+              {/* rejilla interna técnica */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  backgroundImage:
+                    'linear-gradient(hsl(var(--accent) / 0.15) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--accent) / 0.15) 1px, transparent 1px)',
+                  backgroundSize: '18px 18px',
+                }}
+              />
+              {/* corchetes */}
               <span className="absolute left-0 top-0 h-6 w-6 border-l-2 border-t-2 border-accent" />
               <span className="absolute right-0 top-0 h-6 w-6 border-r-2 border-t-2 border-accent" />
               <span className="absolute bottom-0 left-0 h-6 w-6 border-b-2 border-l-2 border-accent" />
               <span className="absolute bottom-0 right-0 h-6 w-6 border-b-2 border-r-2 border-accent" />
+              {/* lecturas HUD mono en las 4 esquinas */}
+              <span className="absolute left-2 top-2 font-mono text-[9px] leading-none text-accent">X:214 Y:087</span>
+              <span className="absolute right-2 top-2 font-mono text-[9px] leading-none text-accent">EAN-13</span>
+              <span className="absolute bottom-2 left-2 font-mono text-[9px] leading-none text-accent">FOCUS·AF</span>
+              <span className="absolute bottom-2 right-2 font-mono text-[9px] leading-none text-accent">1/35</span>
+              {/* crosshair central */}
+              <span className="absolute left-1/2 top-1/2 h-5 w-px -translate-x-1/2 -translate-y-1/2 bg-accent/80" />
+              {/* láser animado */}
               <span className="ean-scanline absolute left-2 right-2 h-0.5 bg-accent" />
             </div>
           </div>

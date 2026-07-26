@@ -59,8 +59,14 @@ export default function AddKit() {
         notes: (fd.get('notes') as string) || undefined,
         price: fd.get('price') ? parseFloat(fd.get('price') as string) : undefined,
       });
-      toast({ title: '¡Añadido a tu colección!' });
-      navigate('/stash');
+      navigate('/saved', {
+        state: {
+          name: fd.get('name') as string,
+          brand: fd.get('brand') as string,
+          scale: fd.get('scale') as string,
+          status,
+        },
+      });
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } finally {

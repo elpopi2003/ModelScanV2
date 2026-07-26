@@ -171,3 +171,12 @@
 .mm-drawer-in {
   animation: mm-slide-in-right 0.28s ease-out;
 }
+
+/* Anillo de éxito (pantalla Guardado) */
+@keyframes mm-pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 hsl(var(--sealed) / 0.45); }
+  50% { box-shadow: 0 0 0 14px hsl(var(--sealed) / 0); }
+}
+.mm-pulse {
+  animation: mm-pulse-glow 2s ease-out infinite;
+}

@@ -11,6 +11,7 @@ import Stash from "./pages/Stash";
 import Scan from "./pages/Scan";
 import KitDetail from "./pages/KitDetail";
 import AddKit from "./pages/AddKit";
+import Saved from "./pages/Saved";
 import SearchPage from "./pages/SearchPage";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
@@ -51,6 +52,7 @@ function AppRoutes() {
         <Route path="/scan" element={<ProtectedRoute><Scan /></ProtectedRoute>} />
         <Route path="/kit/:id" element={<ProtectedRoute><KitDetail /></ProtectedRoute>} />
         <Route path="/add" element={<ProtectedRoute><AddKit /></ProtectedRoute>} />
+        <Route path="/saved" element={<ProtectedRoute><Saved /></ProtectedRoute>} />
         <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />

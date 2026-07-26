@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUserKits } from '@/hooks/useKits';
 import { KitCard } from '@/components/KitCard';
 import { Button } from '@/components/ui/button';
+import { Wordmark } from '@/components/Wordmark';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ const Index = () => {
           className="flex items-center justify-between"
         >
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">ModelKitScan</h1>
+            <Wordmark className="text-2xl" />
             <p className="text-sm text-muted-foreground">Tu colección de modelismo</p>
           </div>
           <Button size="icon" className="h-10 w-10 rounded-full hover:bg-accent hover:text-accent-foreground" onClick={() => navigate('/add')}>

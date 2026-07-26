@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { Menu, X, Camera, Layers, User, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
+import { Wordmark } from '@/components/Wordmark';
 
 function initials(s: string) {
   const parts = s.trim().split(/[\s@._-]+/).filter(Boolean);
@@ -38,19 +40,16 @@ export function AppDrawer({ active }: { active?: 'scan' | 'library' | 'account' 
         <Menu className="h-5 w-5" />
       </button>
 
-      {open && (
-        <div className="fixed inset-0 z-50">
+      {open && createPortal(
+        <div className="fixed inset-0 z-[60]">
           <button
             aria-label="Cerrar menú"
             onClick={() => setOpen(false)}
-            className="absolute inset-0 bg-black/50 animate-in fade-in duration-200"
+            className="absolute inset-0 bg-black/60"
           />
-          <aside className="absolute inset-y-0 left-0 flex w-[84%] max-w-[322px] flex-col bg-sidebar text-sidebar-foreground animate-in slide-in-from-left duration-300">
+          <aside className="mm-drawer-in absolute inset-y-0 right-0 flex w-[84%] max-w-[322px] flex-col bg-sidebar text-sidebar-foreground shadow-2xl">
             <div className="flex items-center justify-between p-5">
-              <span className="font-display text-lg font-extrabold uppercase tracking-[0.02em]">
-                <span className="text-white">Model</span>
-                <span className="text-accent">KitScan</span>
-              </span>
+              <Wordmark onDark className="text-lg" />
               <button
                 onClick={() => setOpen(false)}
                 className="flex h-8 w-8 items-center justify-center rounded-md bg-sidebar-accent"
@@ -108,7 +107,8 @@ export function AppDrawer({ active }: { active?: 'scan' | 'library' | 'account' 
               </button>
             </div>
           </aside>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );

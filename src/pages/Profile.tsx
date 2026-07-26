@@ -48,9 +48,9 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen pb-24 safe-top">
-      <header className="sticky top-0 z-40 flex items-center gap-3 border-b border-border bg-background/90 px-4 pb-4 pt-6 backdrop-blur-xl">
-        <AppDrawer active="account" />
+      <header className="sticky top-0 z-40 flex items-center justify-between border-b border-border bg-background/90 px-4 pb-4 pt-6 backdrop-blur-xl">
         <h1 className="text-lg text-primary">Mi cuenta</h1>
+        <AppDrawer active="account" />
       </header>
 
       <div className="space-y-4 px-4 pt-4">

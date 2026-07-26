@@ -94,10 +94,7 @@ export default function Stash() {
     <div className="min-h-screen pb-24 safe-top">
       <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-xl px-4 pt-6 pb-3">
         <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <AppDrawer active="library" />
-            <h1 className="text-xl font-bold">Mi colección</h1>
-          </div>
+          <h1 className="text-xl font-bold">Mi colección</h1>
           <div className="flex items-center gap-2">
             <Button size="icon" className="rounded-full bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground" onClick={handleExport} title="Exportar a Excel">
               <Download className="h-5 w-5" />
@@ -105,6 +102,7 @@ export default function Stash() {
             <Button size="icon" className="rounded-full bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground" onClick={() => navigate('/add')}>
               <Plus className="h-5 w-5" />
             </Button>
+            <AppDrawer active="library" />
           </div>
         </div>
         <div className="-mx-4 mb-3 flex gap-2 overflow-x-auto px-4 pb-1">

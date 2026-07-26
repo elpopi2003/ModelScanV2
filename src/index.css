@@ -162,3 +162,12 @@
     background-size: 20px 20px;
   }
 }
+
+/* Drawer lateral (entra desde la derecha) */
+@keyframes mm-slide-in-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+.mm-drawer-in {
+  animation: mm-slide-in-right 0.28s ease-out;
+}

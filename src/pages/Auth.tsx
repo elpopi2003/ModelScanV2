@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
 import { Camera, Mail, Lock, User } from 'lucide-react';
+import { Wordmark } from '@/components/Wordmark';
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -71,10 +72,7 @@ export default function Auth() {
           <span className="flex h-11 w-11 items-center justify-center rounded-[10px] border-[2.5px] border-accent text-accent">
             <Camera className="h-6 w-6" strokeWidth={1.9} />
           </span>
-          <span className="font-display text-[23px] font-extrabold uppercase tracking-[0.02em]">
-            <span className="text-primary">Model</span>
-            <span className="text-accent">KitScan</span>
-          </span>
+          <Wordmark className="text-[23px]" />
         </div>
 
         {/* Eyebrow */}

@@ -9,7 +9,6 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { searchScalemates, type ScalematesKit } from '@/lib/scalemates';
 import { useAddKit } from '@/hooks/useKits';
-import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
 interface IdentifiedKit {
@@ -84,7 +83,6 @@ export default function Scan() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const addKit = useAddKit();
-  const { user } = useAuth();
 
   const handleSearchScalemates = async (code: string) => {
     setSearching(true);
@@ -187,24 +185,6 @@ export default function Scan() {
     fileInputRef.current?.click();
   };
 
-  const uploadBoxPhoto = async (dataUrl: string): Promise<string | null> => {
-    if (!user) return null;
-    try {
-      const match = dataUrl.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/);
-      if (!match) return null;
-      const ext = match[1].split('/')[1].replace('+xml', '');
-      const binary = Uint8Array.from(atob(match[2]), c => c.charCodeAt(0));
-      const path = `${user.id}/box-${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from('kit-photos').upload(path, binary, { contentType: match[1] });
-      if (error) throw error;
-      const { data: urlData } = supabase.storage.from('kit-photos').getPublicUrl(path);
-      return urlData.publicUrl;
-    } catch (err) {
-      console.error('Error uploading box photo:', err);
-      return null;
-    }
-  };
-
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -222,12 +202,6 @@ export default function Scan() {
     if (!identifiedKit) return;
     setAddingIdentified(true);
     try {
-      let imageUrl = enrichedData?.image_url || undefined;
-      if (photoPreview) {
-        const uploadedUrl = await uploadBoxPhoto(photoPreview);
-        if (uploadedUrl) imageUrl = uploadedUrl;
-      }
-
       await addKit.mutateAsync({
         kit: {
           name: enrichedData?.name || identifiedKit.name,
@@ -236,7 +210,8 @@ export default function Scan() {
           category: enrichedData?.category || identifiedKit.category,
           reference: enrichedData?.reference || identifiedKit.reference || undefined,
           scalemates_url: enrichedData?.scalemates_url || undefined,
-          image_url: imageUrl,
+          // Siempre la carátula oficial de Scalemates, nunca la foto del usuario
+          image_url: enrichedData?.image_url || undefined,
           year: enrichedData?.year || identifiedKit.year || undefined,
           barcode: enrichedData?.barcode || undefined,
         },

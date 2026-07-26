@@ -159,10 +159,12 @@ Deno.serve(async (req) => {
       }
     }
 
-    console.log(`Found ${results.length} results`);
+    // Deduplicar antes de cachear/devolver (Firecrawl suele repetir el kit)
+    const finalResults = dedupeKits(results);
+    console.log(`Found ${results.length} results (${finalResults.length} tras dedupe)`);
 
     // --- CACHÉ: guardar resultados nuevos en kits (dedupe por scalemates_url) ---
-    for (const kit of results) {
+    for (const kit of finalResults) {
       if (!kit.scalemates_url) continue;
       const { data: exists } = await supabase
         .from('kits')
@@ -184,12 +186,45 @@ Deno.serve(async (req) => {
       }
     }
 
-    return json({ success: true, data: results });
+    return json({ success: true, data: finalResults });
   } catch (error) {
     console.error('Error:', error);
     return json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }, 500);
   }
 });
+
+// Limpia el nombre del kit: corta en la primera etiqueta de ficha de
+// Scalemates y elimina descriptores de tipo y separadores sobrantes.
+function cleanKitName(raw: string): string {
+  return raw
+    .split(/\s*\b(?:Type|Released|Number|Scale|Barcode|Packaging)\b\s*:?/i)[0]
+    .replace(/\[[^\]]*\]\([^)]*\)/g, '')          // enlaces markdown
+    .replace(/\([^)]*\)/g, '')                    // paréntesis
+    .replace(/\s*\|.*$/, '')                       // corta en pipe
+    .replace(/\b(?:plastic\s+)?model\s*kit\b/gi, '') // descriptor de tipo
+    .replace(/\s{2,}/g, ' ')
+    .replace(/[\s|·–:\-]+$/, '')                    // separadores finales
+    .trim();
+}
+
+// Deduplica kits por datos mostrados (marca+nombre+escala+referencia),
+// rellenando imagen/URL/año desde los duplicados más ricos.
+function dedupeKits(kits: ScalematesKit[]): ScalematesKit[] {
+  const map = new Map<string, ScalematesKit>();
+  for (const k of kits) {
+    const key = `${k.brand}|${k.name}|${k.scale}|${k.reference}`.toLowerCase();
+    const existing = map.get(key);
+    if (!existing) {
+      map.set(key, { ...k });
+    } else {
+      existing.image_url ||= k.image_url;
+      existing.scalemates_url ||= k.scalemates_url;
+      existing.barcode ||= k.barcode;
+      existing.year ??= k.year;
+    }
+  }
+  return [...map.values()];
+}
 
 function parseScalematesResult(result: any, barcode?: string): ScalematesKit | null {
   try {
@@ -231,20 +266,10 @@ function parseScalematesResult(result: any, barcode?: string): ScalematesKit | n
 
     const titleFieldMatch = markdown.match(/Title[:\s]*([^\n]+)/i);
     if (titleFieldMatch) {
-      name = titleFieldMatch[1]
-        .replace(/Scale[:\s]*1[:/]\d+/gi, '')
-        .replace(/Number[:\s]*\S+/gi, '')
-        .replace(/Released[:\s]*\d{4}/gi, '')
-        .replace(/Type[:\s]*[A-Za-z\s]+(?:kit|model)/gi, '')
-        .replace(/Barcode[:\s]*\d+/gi, '')
-        .replace(/Packaging[:\s]*[^\n]*/gi, '')
-        .replace(/New\s*(tool|parts)/gi, '')
-        .replace(/Topic[:\s]*\[[^\]]*\]/gi, '')
-        .replace(/\[»[^\]]*\]/gi, '')
-        .replace(/\[[^\]]*\]\([^)]*\)/g, '')
-        .replace(/\([^)]*\)/g, '')
-        .replace(/\s{2,}/g, ' ')
-        .trim();
+      // El título aplanado suele arrastrar las etiquetas de la ficha
+      // (Type/Released/Number/Scale/Barcode/Packaging). Cortamos en la
+      // primera que aparezca y quitamos el descriptor "model kit".
+      name = cleanKitName(titleFieldMatch[1]);
     }
 
     if (!name) {

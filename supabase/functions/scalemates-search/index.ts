@@ -193,11 +193,13 @@ Deno.serve(async (req) => {
   }
 });
 
-// Limpia el nombre del kit: corta en la primera etiqueta de ficha de
-// Scalemates y elimina descriptores de tipo y separadores sobrantes.
+// Limpia el nombre del kit. El título aplanado de Scalemates arrastra las
+// etiquetas de la ficha PEGADAS sin espacio (p.ej. "Honda NSX NA1Number:24100
+// Scale:1:24Type:..."), así que cortamos en la primera "Etiqueta:" — sin exigir
+// límite de palabra previo — y quitamos el descriptor "model kit".
 function cleanKitName(raw: string): string {
   return raw
-    .split(/\s*\b(?:Type|Released|Number|Scale|Barcode|Packaging)\b\s*:?/i)[0]
+    .split(/(?:Number|Scale|Type|Released|Barcode|Packaging|Marketing|Topic)\s*:/i)[0]
     .replace(/\[[^\]]*\]\([^)]*\)/g, '')          // enlaces markdown
     .replace(/\([^)]*\)/g, '')                    // paréntesis
     .replace(/\s*\|.*$/, '')                       // corta en pipe
@@ -287,8 +289,21 @@ function parseScalematesResult(result: any, barcode?: string): ScalematesKit | n
       }
     }
 
-    const imgMatch = markdown.match(/!\[[^\]]*\]\(([^)]+scalemates[^)]*\.(jpg|jpeg|png|webp)[^)]*)\)/i);
-    if (imgMatch) image_url = imgMatch[1];
+    // Imagen: preferir el og:image de la ficha (carátula canónica). Los
+    // banners publicitarios viven en /ras/img/, así que como respaldo del
+    // markdown descartamos esa ruta y nos quedamos con imágenes de producto.
+    const meta = result.metadata || {};
+    const ogImg = meta.ogImage || meta['og:image'] || meta.image;
+    if (typeof ogImg === 'string' && /scalemates\.com/i.test(ogImg) && !/\/ras\/img\//i.test(ogImg)) {
+      image_url = ogImg;
+    }
+    if (!image_url) {
+      const imgRegex = /!\[[^\]]*\]\(([^)]+scalemates[^)]*\.(?:jpg|jpeg|png|webp)[^)]*)\)/gi;
+      let m: RegExpExecArray | null;
+      while ((m = imgRegex.exec(markdown)) !== null) {
+        if (!/\/ras\/img\//i.test(m[1])) { image_url = m[1]; break; }
+      }
+    }
 
     const catText = (markdown + ' ' + title).toLowerCase();
     if (/\b(aircraft|airplane|avion|propeller|jet)\b/.test(catText)) category = 'Aircraft';

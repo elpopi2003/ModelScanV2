@@ -88,14 +88,14 @@ export default function Auth() {
         </div>
 
         {/* Eyebrow */}
-        <p className="font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-accent">
+        <p className="text-center font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-accent">
           {isLogin ? 'Bienvenido de nuevo' : 'Crea tu cuenta'}
         </p>
         {/* H1 (Raleway uppercase via base style) */}
-        <h1 className="mb-2.5 mt-2 text-[28px] leading-[1.05] text-primary">
+        <h1 className="mb-2.5 mt-2 text-center text-[28px] leading-[1.05] text-primary">
           {isLogin ? 'Inicia sesión' : 'Regístrate gratis'}
         </h1>
-        <p className="mb-6 text-[14.5px] text-muted-foreground">
+        <p className="mb-6 text-center text-[14.5px] text-muted-foreground">
           Escanea, cataloga y organiza tu colección de maquetas en un solo sitio.
         </p>
 
@@ -201,7 +201,7 @@ export default function Auth() {
 
         {/* Footer tagline */}
         <p className="mt-6 text-center font-mono text-[10px] uppercase tracking-[0.14em] text-accent underline underline-offset-4">
-          Hecho por maquetistas
+          Hecho por modelistas para modelistas
         </p>
       </motion.div>
     </div>

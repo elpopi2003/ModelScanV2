@@ -16,7 +16,7 @@ export function KitGrid({ kits }: KitGridProps) {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="columns-2 gap-3">
       {kits.map((kit, i) => (
         <KitCard key={kit.id} userKit={kit} index={i} />
       ))}

@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Badge } from '@/components/ui/badge';
+import { Package, Wrench, Check, Star, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { cleanKitImage } from '@/lib/kitImage';
 import type { UserKitWithKit } from '@/hooks/useKits';
 
 const statusLabels: Record<string, string> = {
@@ -11,11 +12,20 @@ const statusLabels: Record<string, string> = {
   wishlist: 'Vitrina',
 };
 
-const statusColors: Record<string, string> = {
-  stash: 'bg-[hsl(var(--kit-stash))]/20 text-[hsl(var(--kit-stash))]',
-  'in-progress': 'bg-[hsl(var(--kit-progress))]/20 text-[hsl(var(--kit-progress))]',
-  completed: 'bg-[hsl(var(--kit-completed))]/20 text-[hsl(var(--kit-completed))]',
-  wishlist: 'bg-[hsl(var(--kit-wishlist))]/20 text-[hsl(var(--kit-wishlist))]',
+// Icono representativo de cada estantería
+const statusIcons: Record<string, LucideIcon> = {
+  stash: Package,
+  'in-progress': Wrench,
+  completed: Check,
+  wishlist: Star,
+};
+
+// Color sólido del círculo, uno por estantería
+const statusSolid: Record<string, string> = {
+  stash: 'bg-[hsl(var(--kit-stash))]',
+  'in-progress': 'bg-[hsl(var(--kit-progress))]',
+  completed: 'bg-[hsl(var(--kit-completed))]',
+  wishlist: 'bg-[hsl(var(--kit-wishlist))]',
 };
 
 interface KitCardProps {
@@ -26,37 +36,44 @@ interface KitCardProps {
 export function KitCard({ userKit, index = 0 }: KitCardProps) {
   const navigate = useNavigate();
   const kit = userKit.kits;
+  const imgSrc = cleanKitImage(kit.image_url);
+  const StatusIcon = statusIcons[userKit.status] ?? Package;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05, duration: 0.3 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: index * 0.04, duration: 0.3 }}
       onClick={() => navigate(`/kit/${userKit.id}`)}
-      className="group cursor-pointer overflow-hidden rounded-md bg-card blueprint-card transition-transform active:scale-[0.98]"
+      className="group mb-3 block break-inside-avoid cursor-pointer overflow-hidden rounded-md bg-card blueprint-card transition-transform active:scale-[0.98]"
     >
-      <div className="relative aspect-[4/3] overflow-hidden mm-grid">
-        {kit.image_url ? (
-          <img
-            src={kit.image_url}
-            alt={kit.name}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-            loading="lazy"
-          />
+      <div className="relative overflow-hidden mm-grid">
+        {imgSrc ? (
+          // Foto a proporción natural; se recorta un mínimo por arriba para
+          // eliminar el watermark "scalemates" incrustado en esa franja.
+          <div className="-mt-[5%]">
+            <img src={imgSrc} alt={kit.name} className="block h-auto w-full" loading="lazy" />
+          </div>
         ) : (
-          <div className="flex h-full items-center justify-center text-muted-foreground/30">
+          <div className="flex aspect-[4/3] items-center justify-center text-muted-foreground/30">
             <span className="text-3xl">📦</span>
           </div>
         )}
-        <div className="absolute top-2 right-2">
-          <Badge className={cn('text-[10px] font-semibold border-0', statusColors[userKit.status] ?? '')}>
-            {statusLabels[userKit.status] ?? userKit.status}
-          </Badge>
+        {/* Estado: icono en círculo de color, a 2px del borde */}
+        <div
+          title={statusLabels[userKit.status] ?? userKit.status}
+          className={cn(
+            'absolute right-0.5 top-0.5 flex h-7 w-7 items-center justify-center rounded-full text-white shadow-md ring-2 ring-white/70',
+            statusSolid[userKit.status] ?? 'bg-primary',
+          )}
+        >
+          <StatusIcon className="h-3.5 w-3.5" strokeWidth={2.5} />
         </div>
       </div>
       <div className="px-3 py-2.5">
         <p className="text-[11px] font-mono font-medium uppercase tracking-wider text-accent">{kit.brand}</p>
-        <h3 className="text-sm font-bold leading-tight text-foreground line-clamp-2">{kit.name}</h3>
+        {/* Nombre completo (sin truncar) */}
+        <h3 className="text-sm font-bold leading-tight text-foreground">{kit.name}</h3>
         <div className="mt-1.5 flex items-center justify-between">
           <span className="text-xs font-mono text-muted-foreground">{kit.scale}</span>
           {userKit.price != null && (

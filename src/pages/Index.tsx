@@ -113,7 +113,7 @@ const Index = () => {
             ))}
           </div>
         ) : recentKits.length > 0 ? (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="columns-2 gap-3">
             {recentKits.map((uk, i) => (
               <KitCard key={uk.id} userKit={uk} index={i} />
             ))}

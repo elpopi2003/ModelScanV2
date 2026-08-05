@@ -13,5 +13,9 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
+    // PKCE: el redirect OAuth devuelve un ?code que canjeamos por sesión.
+    // En web lo hace el SDK solo; en nativo lo canjea el deep link (lib/oauth).
+    flowType: 'pkce',
+    detectSessionInUrl: true,
   }
 });

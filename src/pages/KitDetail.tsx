@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ExternalLink, Pencil, Trash2, Check, X } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Pencil, Trash2, Check, X, Package } from 'lucide-react';
 import { useUserKits, useDeleteUserKit, useUpdateUserKit } from '@/hooks/useKits';
-import { Badge } from '@/components/ui/badge';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,21 +19,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { cleanKitImage } from '@/lib/kitImage';
+import { KIT_STATUS_LABELS, KIT_STATUS_ICONS, KIT_STATUS_SOLID } from '@/lib/kitStatus';
 import { useToast } from '@/hooks/use-toast';
-
-const statusLabels: Record<string, string> = {
-  stash: 'En Stash',
-  'in-progress': 'En Progreso',
-  completed: 'Completado',
-  wishlist: 'Wishlist',
-};
-
-const statusColors: Record<string, string> = {
-  stash: 'bg-primary/20 text-primary',
-  'in-progress': 'bg-accent/20 text-accent',
-  completed: 'bg-[hsl(var(--kit-completed))]/20 text-[hsl(var(--kit-completed))]',
-  wishlist: 'bg-[hsl(var(--kit-wishlist))]/20 text-[hsl(var(--kit-wishlist))]',
-};
 
 export default function KitDetail() {
   const { id } = useParams();
@@ -90,6 +77,8 @@ export default function KitDetail() {
   }
 
   const kit = userKit.kits;
+  const imgSrc = cleanKitImage(kit.image_url);
+  const StatusIcon = KIT_STATUS_ICONS[userKit.status] ?? Package;
 
   const handleDelete = async () => {
     try {
@@ -101,76 +90,61 @@ export default function KitDetail() {
     }
   };
 
+  const btnBase =
+    'flex h-10 w-10 items-center justify-center rounded-md border border-border bg-background/80 backdrop-blur-sm text-primary';
+
   return (
     <div className="min-h-screen pb-24 safe-top">
-      <div className="relative">
-        {kit.image_url ? (
-         <motion.img
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            src={kit.image_url}
-            alt={kit.name}
-            loading="lazy"
-            className="h-64 w-full object-cover"
-          />
+      {/* Hero: carátula limpia (sin watermark, recorte mínimo superior) */}
+      <div className="relative overflow-hidden">
+        {imgSrc ? (
+          <div className="-mt-[5%]">
+            <motion.img
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              src={imgSrc}
+              alt={kit.name}
+              loading="lazy"
+              className="block h-auto w-full"
+            />
+          </div>
         ) : (
-          <div className="flex h-64 items-center justify-center bg-muted">
+          <div className="mm-grid flex h-56 items-center justify-center text-muted-foreground/30">
             <span className="text-6xl">📦</span>
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/30" />
-        <button
-          onClick={() => navigate(-1)}
-          className="absolute top-4 left-4 rounded-full bg-background/60 p-2 backdrop-blur-sm"
-        >
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-background to-transparent" />
+
+        <button onClick={() => navigate(-1)} className={cn(btnBase, 'absolute left-4 top-4')}>
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <div className="absolute top-4 right-4 flex gap-2">
+
+        <div className="absolute right-4 top-4 flex gap-2">
           {editing ? (
             <>
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={saveChanges}
-                disabled={updateKit.isPending}
-                className="rounded-full bg-background/60 backdrop-blur-sm text-primary"
-              >
-                <Check className="h-4 w-4" />
-              </Button>
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={cancelEditing}
-                className="rounded-full bg-background/60 backdrop-blur-sm text-muted-foreground"
-              >
-                <X className="h-4 w-4" />
-              </Button>
+              <button onClick={saveChanges} disabled={updateKit.isPending} className={btnBase}>
+                <Check className="h-5 w-5" />
+              </button>
+              <button onClick={cancelEditing} className={cn(btnBase, 'text-muted-foreground')}>
+                <X className="h-5 w-5" />
+              </button>
             </>
           ) : (
             <>
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={startEditing}
-                className="rounded-full bg-background/60 backdrop-blur-sm"
-              >
+              <button onClick={startEditing} className={btnBase}>
                 <Pencil className="h-4 w-4" />
-              </Button>
+              </button>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="rounded-full bg-destructive backdrop-blur-sm text-destructive-foreground hover:bg-destructive/90"
-                  >
+                  <button className="flex h-10 w-10 items-center justify-center rounded-md bg-destructive text-destructive-foreground">
                     <Trash2 className="h-4 w-4" />
-                  </Button>
+                  </button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>¿Eliminar maqueta?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Esta acción no se puede deshacer. Se eliminará «{kit.name}» de tu stash.
+                      Esta acción no se puede deshacer. Se eliminará «{kit.name}» de tu colección.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -189,45 +163,56 @@ export default function KitDetail() {
         </div>
       </div>
 
-      <div className="relative -mt-8 rounded-t-3xl bg-background px-4 pt-6">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <p className="text-sm font-medium text-primary">{kit.brand}</p>
-            <h1 className="text-xl font-bold">{kit.name}</h1>
+      {/* Ficha */}
+      <div className="relative -mt-6 rounded-t-2xl bg-background px-4 pt-6">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="font-mono text-[11px] font-medium uppercase tracking-wider text-accent">{kit.brand}</p>
+            <h1 className="mt-1 text-xl leading-tight text-primary">{kit.name}</h1>
           </div>
           {editing ? (
             <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger className="w-36 h-8 text-xs rounded-full">
+              <SelectTrigger className="h-8 w-40 shrink-0 rounded-md text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {Object.entries(statusLabels).map(([value, label]) => (
+                {Object.entries(KIT_STATUS_LABELS).map(([value, label]) => (
                   <SelectItem key={value} value={value}>{label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
           ) : (
-            <Badge className={cn('shrink-0 border-0', statusColors[userKit.status] ?? '')}>
-              {statusLabels[userKit.status] ?? userKit.status}
-            </Badge>
+            <div className="flex shrink-0 flex-col items-center gap-1.5">
+              <div
+                className={cn(
+                  'flex h-11 w-11 items-center justify-center rounded-full text-white shadow-md ring-2 ring-white/70',
+                  KIT_STATUS_SOLID[userKit.status] ?? 'bg-primary',
+                )}
+              >
+                <StatusIcon className="h-5 w-5" strokeWidth={2.5} />
+              </div>
+              <span className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
+                {KIT_STATUS_LABELS[userKit.status] ?? userKit.status}
+              </span>
+            </div>
           )}
         </div>
 
+        {/* Specs (tarjetas blueprint) */}
         <div className="mt-5 grid grid-cols-2 gap-3">
           {[
             { label: 'Escala', value: kit.scale },
             { label: 'Referencia', value: kit.reference ?? '—' },
             { label: 'Año', value: kit.year?.toString() ?? '—' },
           ].map((item) => (
-            <div key={item.label} className="rounded-lg bg-secondary/50 p-3">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{item.label}</p>
-              <p className="mt-0.5 text-sm font-semibold font-mono">{item.value}</p>
+            <div key={item.label} className="rounded-md border border-border bg-muted/40 p-3">
+              <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">{item.label}</p>
+              <p className="mt-0.5 font-mono text-sm font-medium text-foreground">{item.value}</p>
             </div>
           ))}
 
-          {/* Editable fields: Price & Purchase date */}
-          <div className="rounded-lg bg-secondary/50 p-3">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Precio</p>
+          <div className="rounded-md border border-border bg-muted/40 p-3">
+            <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">Precio</p>
             {editing ? (
               <Input
                 type="number"
@@ -235,32 +220,32 @@ export default function KitDetail() {
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 placeholder="0.00"
-                className="mt-1 h-7 text-sm px-2"
+                className="mt-1 h-7 px-2 text-sm"
               />
             ) : (
-              <p className="mt-0.5 text-sm font-semibold font-mono">
+              <p className="mt-0.5 font-mono text-sm font-medium text-foreground">
                 {userKit.price ? `${Number(userKit.price).toFixed(2)} €` : '—'}
               </p>
             )}
           </div>
-          <div className="rounded-lg bg-secondary/50 p-3">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Compra</p>
+          <div className="rounded-md border border-border bg-muted/40 p-3">
+            <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">Compra</p>
             {editing ? (
               <Input
                 type="date"
                 value={purchaseDate}
                 onChange={(e) => setPurchaseDate(e.target.value)}
-                className="mt-1 h-7 text-sm px-2"
+                className="mt-1 h-7 px-2 text-sm"
               />
             ) : (
-              <p className="mt-0.5 text-sm font-semibold font-mono">{userKit.purchase_date ?? '—'}</p>
+              <p className="mt-0.5 font-mono text-sm font-medium text-foreground">{userKit.purchase_date ?? '—'}</p>
             )}
           </div>
         </div>
 
-        {/* Notes section */}
+        {/* Notas */}
         <div className="mt-5">
-          <h2 className="text-sm font-semibold mb-1">Notas</h2>
+          <h2 className="mb-1.5 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">Notas</h2>
           {editing ? (
             <Textarea
               value={notes}
@@ -269,12 +254,10 @@ export default function KitDetail() {
               className="text-sm"
               rows={3}
             />
+          ) : userKit.notes ? (
+            <p className="text-sm text-foreground">{userKit.notes}</p>
           ) : (
-            userKit.notes ? (
-              <p className="text-sm text-muted-foreground">{userKit.notes}</p>
-            ) : (
-              <p className="text-sm text-muted-foreground/50 italic">Sin notas</p>
-            )
+            <p className="text-sm italic text-muted-foreground/60">Sin notas</p>
           )}
         </div>
 
@@ -283,7 +266,7 @@ export default function KitDetail() {
             href={kit.scalemates_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-5 flex items-center gap-2 rounded-lg border border-border p-3 text-sm text-primary hover:bg-secondary/50 transition-colors"
+            className="mt-5 flex items-center gap-2 rounded-md border border-border bg-card p-3 text-sm font-medium text-primary transition-colors hover:bg-secondary/50"
           >
             <ExternalLink className="h-4 w-4" />
             Ver en Scalemates

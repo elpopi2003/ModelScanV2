@@ -1,32 +1,10 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Package, Wrench, Check, Star, type LucideIcon } from 'lucide-react';
+import { Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { cleanKitImage } from '@/lib/kitImage';
+import { KIT_STATUS_LABELS, KIT_STATUS_ICONS, KIT_STATUS_SOLID } from '@/lib/kitStatus';
 import type { UserKitWithKit } from '@/hooks/useKits';
-
-const statusLabels: Record<string, string> = {
-  stash: 'Por montar',
-  'in-progress': 'En construcción',
-  completed: 'Terminadas',
-  wishlist: 'Vitrina',
-};
-
-// Icono representativo de cada estantería
-const statusIcons: Record<string, LucideIcon> = {
-  stash: Package,
-  'in-progress': Wrench,
-  completed: Check,
-  wishlist: Star,
-};
-
-// Color sólido del círculo, uno por estantería
-const statusSolid: Record<string, string> = {
-  stash: 'bg-[hsl(var(--kit-stash))]',
-  'in-progress': 'bg-[hsl(var(--kit-progress))]',
-  completed: 'bg-[hsl(var(--kit-completed))]',
-  wishlist: 'bg-[hsl(var(--kit-wishlist))]',
-};
 
 interface KitCardProps {
   userKit: UserKitWithKit;
@@ -37,7 +15,7 @@ export function KitCard({ userKit, index = 0 }: KitCardProps) {
   const navigate = useNavigate();
   const kit = userKit.kits;
   const imgSrc = cleanKitImage(kit.image_url);
-  const StatusIcon = statusIcons[userKit.status] ?? Package;
+  const StatusIcon = KIT_STATUS_ICONS[userKit.status] ?? Package;
 
   return (
     <motion.div
@@ -61,10 +39,10 @@ export function KitCard({ userKit, index = 0 }: KitCardProps) {
         )}
         {/* Estado: icono en círculo de color, a 2px del borde */}
         <div
-          title={statusLabels[userKit.status] ?? userKit.status}
+          title={KIT_STATUS_LABELS[userKit.status] ?? userKit.status}
           className={cn(
             'absolute right-0.5 top-0.5 flex h-7 w-7 items-center justify-center rounded-full text-white shadow-md ring-2 ring-white/70',
-            statusSolid[userKit.status] ?? 'bg-primary',
+            KIT_STATUS_SOLID[userKit.status] ?? 'bg-primary',
           )}
         >
           <StatusIcon className="h-3.5 w-3.5" strokeWidth={2.5} />

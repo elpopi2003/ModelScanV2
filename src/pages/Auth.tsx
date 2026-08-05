@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 import { Camera, Mail, Lock, User } from 'lucide-react';
 import { Wordmark } from '@/components/Wordmark';
 import { signInWithProvider } from '@/lib/oauth';
+import loginBg from '@/assets/login-bg.jpg';
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -58,14 +59,28 @@ export default function Auth() {
   const labelCls = 'font-mono text-[11px] uppercase tracking-wider text-muted-foreground';
 
   return (
-    <div className="flex min-h-screen flex-col px-[30px] pb-8 pt-[70px] safe-top">
+    <div className="relative flex min-h-screen items-center justify-center px-5 py-10 safe-top">
+      {/* Fondo: pared de maquetas + velo azul del sistema Blueprint */}
+      <div aria-hidden className="fixed inset-0">
+        <img src={loginBg} alt="" className="h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-primary/70" />
+        <div
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage:
+              'linear-gradient(hsl(0 0% 100% / 0.6) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 100% / 0.6) 1px, transparent 1px)',
+            backgroundSize: '28px 28px',
+          }}
+        />
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mx-auto w-full max-w-sm"
+        className="blueprint-card relative z-10 w-full max-w-sm rounded-md bg-card p-7"
       >
         {/* Wordmark lockup */}
-        <div className="mb-9 flex items-center justify-center gap-3">
+        <div className="mb-7 flex items-center justify-center gap-3">
           <span className="flex h-11 w-11 items-center justify-center rounded-[10px] border-[2.5px] border-accent text-accent">
             <Camera className="h-6 w-6" strokeWidth={1.9} />
           </span>
@@ -185,7 +200,7 @@ export default function Auth() {
         </p>
 
         {/* Footer tagline */}
-        <p className="mt-8 text-center font-mono text-[10px] uppercase tracking-[0.14em] text-accent underline underline-offset-4">
+        <p className="mt-6 text-center font-mono text-[10px] uppercase tracking-[0.14em] text-accent underline underline-offset-4">
           Hecho por maquetistas
         </p>
       </motion.div>

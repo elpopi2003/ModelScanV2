@@ -17,6 +17,7 @@ export type Database = {
     Tables: {
       kits: {
         Row: {
+          avg_price: number | null
           barcode: string | null
           brand: string
           category: string
@@ -30,6 +31,7 @@ export type Database = {
           year: number | null
         }
         Insert: {
+          avg_price?: number | null
           barcode?: string | null
           brand: string
           category?: string
@@ -43,6 +45,7 @@ export type Database = {
           year?: number | null
         }
         Update: {
+          avg_price?: number | null
           barcode?: string | null
           brand?: string
           category?: string

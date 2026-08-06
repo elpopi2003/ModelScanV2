@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ExternalLink, Pencil, Trash2, Check, X, Package } from 'lucide-react';
 import { useUserKits, useDeleteUserKit, useUpdateUserKit } from '@/hooks/useKits';
+import { supabase } from '@/integrations/supabase/client';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,6 +40,26 @@ export default function KitDetail() {
   const [notes, setNotes] = useState('');
   const [price, setPrice] = useState('');
   const [purchaseDate, setPurchaseDate] = useState('');
+
+  // Precio medio de vendedores de Scalemates: cacheado en el kit; si no está,
+  // se pide bajo demanda a la edge function (solo la primera vez por kit).
+  const [avgPrice, setAvgPrice] = useState<number | null | undefined>(undefined);
+  const [priceLoading, setPriceLoading] = useState(false);
+
+  useEffect(() => {
+    const k = userKit?.kits;
+    if (!k) return;
+    if (k.avg_price != null) { setAvgPrice(Number(k.avg_price)); return; }
+    if (!k.scalemates_url) { setAvgPrice(null); return; }
+    let cancelled = false;
+    setPriceLoading(true);
+    supabase.functions
+      .invoke('scalemates-price', { body: { id: k.id, url: k.scalemates_url } })
+      .then(({ data }) => { if (!cancelled) setAvgPrice(data?.avg_price ?? null); })
+      .catch(() => { if (!cancelled) setAvgPrice(null); })
+      .finally(() => { if (!cancelled) setPriceLoading(false); });
+    return () => { cancelled = true; };
+  }, [userKit?.kits?.id, userKit?.kits?.avg_price, userKit?.kits?.scalemates_url]);
 
   const startEditing = () => {
     if (!userKit) return;
@@ -79,6 +100,8 @@ export default function KitDetail() {
   const kit = userKit.kits;
   const imgSrc = cleanKitImage(kit.image_url);
   const StatusIcon = KIT_STATUS_ICONS[userKit.status] ?? Package;
+  // Etiquetas de las cajas: naranja + peso alto para legibilidad
+  const specLabelCls = 'font-mono text-[9px] font-semibold uppercase tracking-wider text-accent';
 
   const handleDelete = async () => {
     try {
@@ -94,7 +117,7 @@ export default function KitDetail() {
     'flex h-10 w-10 items-center justify-center rounded-md border border-border bg-background/80 backdrop-blur-sm text-primary';
 
   return (
-    <div className="min-h-screen pb-24 safe-top">
+    <div className="min-h-screen pb-24" style={{ paddingTop: 'max(env(safe-area-inset-top), 20px)' }}>
       {/* Hero: carátula limpia (sin watermark, recorte mínimo superior) */}
       <div className="relative overflow-hidden">
         {imgSrc ? (
@@ -206,13 +229,21 @@ export default function KitDetail() {
             { label: 'Año', value: kit.year?.toString() ?? '—' },
           ].map((item) => (
             <div key={item.label} className="rounded-md border border-border bg-muted/40 p-3">
-              <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">{item.label}</p>
+              <p className={specLabelCls}>{item.label}</p>
               <p className="mt-0.5 font-mono text-sm font-medium text-foreground">{item.value}</p>
             </div>
           ))}
 
+          {/* Precio medio de vendedores en Scalemates */}
           <div className="rounded-md border border-border bg-muted/40 p-3">
-            <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">Precio</p>
+            <p className={specLabelCls}>Precio medio</p>
+            <p className="mt-0.5 font-mono text-sm font-medium text-foreground">
+              {priceLoading ? '…' : avgPrice != null ? `${avgPrice.toFixed(2)} €` : '—'}
+            </p>
+          </div>
+
+          <div className="rounded-md border border-border bg-muted/40 p-3">
+            <p className={specLabelCls}>Precio</p>
             {editing ? (
               <Input
                 type="number"
@@ -229,7 +260,7 @@ export default function KitDetail() {
             )}
           </div>
           <div className="rounded-md border border-border bg-muted/40 p-3">
-            <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">Compra</p>
+            <p className={specLabelCls}>Compra</p>
             {editing ? (
               <Input
                 type="date"
@@ -245,7 +276,7 @@ export default function KitDetail() {
 
         {/* Notas */}
         <div className="mt-5">
-          <h2 className="mb-1.5 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">Notas</h2>
+          <h2 className="mb-1.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-accent">Notas</h2>
           {editing ? (
             <Textarea
               value={notes}

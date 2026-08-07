@@ -6,10 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
-import { Camera, Mail, Lock, User } from 'lucide-react';
+import { Mail, Lock, User } from 'lucide-react';
 import { Wordmark } from '@/components/Wordmark';
 import { signInWithProvider } from '@/lib/oauth';
 import loginBg from '@/assets/login-bg.jpg';
+import appIcon from '@/assets/app-icon.png';
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -79,11 +80,9 @@ export default function Auth() {
         animate={{ opacity: 1, y: 0 }}
         className="blueprint-card relative z-10 w-full max-w-sm rounded-md bg-card p-7"
       >
-        {/* Wordmark lockup */}
-        <div className="mb-7 flex items-center justify-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-[10px] border-[2.5px] border-accent text-accent">
-            <Camera className="h-6 w-6" strokeWidth={1.9} />
-          </span>
+        {/* Lockup: icono de la app + wordmark */}
+        <div className="mb-7 flex items-center justify-center gap-2.5">
+          <img src={appIcon} alt="ModelKitScan" className="h-12 w-12 shrink-0" />
           <Wordmark className="text-[23px]" />
         </div>
 

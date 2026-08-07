@@ -1,40 +1,42 @@
-// OAuth social (Google/Apple) con soporte nativo (Capacitor) y web.
-//
-// Nativo: signInWithOAuth con skipBrowserRedirect nos da la URL del proveedor;
-// la abrimos en el navegador del sistema. Tras autenticar, Supabase redirige a
-// nuestro esquema propio (com.modelkitscan.app://auth/callback?code=...). El SO
-// reabre la app, el listener appUrlOpen captura la URL, canjeamos el ?code por
-// sesión (PKCE) y cerramos el navegador.
-//
-// Web: el SDK redirige y detecta la sesión en la URL automáticamente.
+// Login social. En nativo (Android) usamos Google Sign-In NATIVO vía Credential
+// Manager (@capgo/capacitor-social-login): sale el selector de cuentas del
+// sistema, sin navegador ni dominio de Supabase a la vista. Obtenemos el idToken
+// y lo canjeamos con supabase.auth.signInWithIdToken. En web, redirección clásica.
 import { Capacitor } from '@capacitor/core';
-import { App } from '@capacitor/app';
-import { Browser } from '@capacitor/browser';
+import { SocialLogin } from '@capgo/capacitor-social-login';
 import { supabase } from '@/integrations/supabase/client';
 
 export type OAuthProvider = 'google' | 'apple';
 
-// Debe coincidir con el intent-filter de AndroidManifest y con las Redirect URLs
-// permitidas en Supabase (Auth → URL Configuration).
-export const NATIVE_REDIRECT = 'com.modelkitscan.app://auth/callback';
+// Client ID de tipo "Web" de Google (público; se usa como serverClientId para
+// que el idToken tenga la audiencia que Supabase valida).
+const GOOGLE_WEB_CLIENT_ID = '235326987205-ibumme7kbjaq8oqqaph47uv9coju17u7.apps.googleusercontent.com';
+
+let googleInited = false;
+async function ensureGoogleInit(): Promise<void> {
+  if (googleInited) return;
+  await SocialLogin.initialize({ google: { webClientId: GOOGLE_WEB_CLIENT_ID } });
+  googleInited = true;
+}
 
 export async function signInWithProvider(provider: OAuthProvider): Promise<void> {
-  if (Capacitor.isNativePlatform()) {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: NATIVE_REDIRECT,
-        skipBrowserRedirect: true,
-      },
+  // Google nativo (Android): selector de cuentas del sistema → idToken → Supabase.
+  if (provider === 'google' && Capacitor.isNativePlatform()) {
+    await ensureGoogleInit();
+    // Sin scopes extra: solo autenticación (idToken con email/perfil). Pedir
+    // scopes obligaría a modificar la MainActivity (AuthorizationClient).
+    const { result } = await SocialLogin.login({
+      provider: 'google',
+      options: {},
     });
+    const idToken = (result as { idToken?: string | null }).idToken;
+    if (!idToken) throw new Error('No se obtuvo el token de Google.');
+    const { error } = await supabase.auth.signInWithIdToken({ provider: 'google', token: idToken });
     if (error) throw error;
-    if (data?.url) {
-      await Browser.open({ url: data.url, presentationStyle: 'popover' });
-    }
     return;
   }
 
-  // Web: redirección clásica, la sesión se detecta al volver.
+  // Web (servidor de desarrollo): redirección OAuth clásica.
   const { error } = await supabase.auth.signInWithOAuth({
     provider,
     options: { redirectTo: window.location.origin },
@@ -42,32 +44,8 @@ export async function signInWithProvider(provider: OAuthProvider): Promise<void>
   if (error) throw error;
 }
 
-let deepLinkInited = false;
-
-// Registra (una sola vez) la captura del deep link de retorno OAuth.
+// El login nativo ya no usa deep link; se mantiene como no-op por compatibilidad
+// con quien lo invoque (App.tsx). La sesión en web la detecta el SDK en la URL.
 export function initDeepLinkAuth(): void {
-  if (deepLinkInited || !Capacitor.isNativePlatform()) return;
-  deepLinkInited = true;
-
-  App.addListener('appUrlOpen', async ({ url }) => {
-    if (!url || !url.startsWith(NATIVE_REDIRECT)) return;
-    try {
-      const parsed = new URL(url);
-      const code = parsed.searchParams.get('code');
-      const errorDesc = parsed.searchParams.get('error_description');
-      if (errorDesc) throw new Error(errorDesc);
-      if (code) {
-        await supabase.auth.exchangeCodeForSession(code);
-      }
-    } catch (err) {
-      console.error('OAuth deep link error:', err);
-    } finally {
-      // Cerrar el navegador del sistema; en algunas plataformas ya está cerrado.
-      try {
-        await Browser.close();
-      } catch {
-        /* noop */
-      }
-    }
-  });
+  /* noop: Google nativo no requiere captura de deep link */
 }

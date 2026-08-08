@@ -10,7 +10,7 @@ export type OAuthProvider = 'google' | 'apple';
 
 // Client ID de tipo "Web" de Google (público; se usa como serverClientId para
 // que el idToken tenga la audiencia que Supabase valida).
-const GOOGLE_WEB_CLIENT_ID = '235326987205-ibumme7kbjaq8oqqaph47uv9coju17u7.apps.googleusercontent.com';
+const GOOGLE_WEB_CLIENT_ID = '235326987205-b4so9gld0n5tlikc18gn99t9fr8lpc9i.apps.googleusercontent.com';
 
 let googleInited = false;
 async function ensureGoogleInit(): Promise<void> {

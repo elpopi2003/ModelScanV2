@@ -91,8 +91,8 @@ export default function Stash() {
   }, [filtered]);
 
   return (
-    <div className="min-h-screen pb-24 safe-top">
-      <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-xl px-4 pt-6 pb-3">
+    <div className="min-h-screen pb-24">
+      <header className="pt-safe-header sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-xl px-4 pb-3">
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-xl font-bold">Mi colección</h1>
           <div className="flex items-center gap-2">
@@ -131,7 +131,7 @@ export default function Stash() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por nombre, marca o referencia..."
-            className="pl-9 rounded-full"
+            className="pl-9 rounded-full text-sm"
           />
         </div>
         <FilterBar items={scales} selected={scaleFilter} onSelect={setScaleFilter} />

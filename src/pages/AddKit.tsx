@@ -75,8 +75,8 @@ export default function AddKit() {
   };
 
   return (
-    <div className="min-h-screen pb-24 safe-top">
-      <header className="sticky top-0 z-40 flex items-center gap-3 border-b border-border bg-background/90 px-4 pb-4 pt-6 backdrop-blur-xl">
+    <div className="min-h-screen pb-24">
+      <header className="pt-safe-header sticky top-0 z-40 flex items-center gap-3 border-b border-border bg-background/90 px-4 pb-4 backdrop-blur-xl">
         <button onClick={() => navigate(-1)} className="rounded-md border border-border p-1.5">
           <ArrowLeft className="h-5 w-5" />
         </button>

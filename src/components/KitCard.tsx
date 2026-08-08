@@ -41,7 +41,7 @@ export function KitCard({ userKit, index = 0 }: KitCardProps) {
         <div
           title={KIT_STATUS_LABELS[userKit.status] ?? userKit.status}
           className={cn(
-            'absolute right-0.5 top-0.5 flex h-7 w-7 items-center justify-center rounded-full text-white shadow-md ring-2 ring-white/70',
+            'absolute right-[5px] top-[5px] flex h-7 w-7 items-center justify-center rounded-full text-white shadow-md ring-2 ring-white/70',
             KIT_STATUS_SOLID[userKit.status] ?? 'bg-primary',
           )}
         >

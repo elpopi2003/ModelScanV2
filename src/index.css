@@ -144,6 +144,11 @@
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
+  /* Cabecera fija: deja hueco para la barra de estado / notch aunque esté
+     pegada arriba al hacer scroll. */
+  .pt-safe-header {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 0.75rem);
+  }
 }
 
 @layer components {

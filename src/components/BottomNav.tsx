@@ -16,7 +16,8 @@ export function BottomNav() {
   const navigate = useNavigate();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/80 backdrop-blur-xl safe-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 z-50">
+      <div className="border-t border-border bg-card/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-lg items-center justify-around px-2 py-1">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
@@ -53,6 +54,9 @@ export function BottomNav() {
           );
         })}
       </div>
+      </div>
+      {/* Franja negra tras la barra de navegación del sistema (back/inicio/recientes) */}
+      <div className="bg-black" style={{ height: 'env(safe-area-inset-bottom, 0px)' }} />
     </nav>
   );
 }

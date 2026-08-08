@@ -18,7 +18,7 @@ export function BottomNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50">
       <div className="border-t border-border bg-card/80 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-lg items-center justify-around px-2 py-1">
+      <div className="mx-auto flex max-w-lg items-stretch px-1 py-1">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           const Icon = item.icon;
@@ -29,11 +29,11 @@ export function BottomNav() {
               key={item.path}
               onClick={() => navigate(item.path)}
               className={cn(
-                'relative flex flex-col items-center gap-0.5 rounded-xl px-3 py-2 text-xs transition-colors',
+                // flex-1 + min-w-0: reparto equitativo, ningún item se sale del borde
+                'relative flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-xl px-1 py-2 text-[11px] transition-colors',
                 isActive
                   ? 'text-primary'
                   : 'text-muted-foreground hover:text-foreground',
-                isScan && 'px-4'
               )}
             >
               {isActive && (
@@ -49,7 +49,7 @@ export function BottomNav() {
                   isScan && 'h-6 w-6'
                 )}
               />
-              <span className="relative z-10 font-medium">{item.label}</span>
+              <span className="relative z-10 w-full truncate text-center font-medium">{item.label}</span>
             </button>
           );
         })}
